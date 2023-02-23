@@ -1,13 +1,11 @@
 import opratorParser from './opratorParser.js'
 
-
-
 export default function valueParser(input){
     input=input.trim()
-    return (booleanParser(input)||
+    return ( opratorParser(input)||
+            booleanParser(input)||
             numberParser(input)||
-            StringParser(input)||
-            opratorParser(input))
+            StringParser(input))
 
 }
 
