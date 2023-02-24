@@ -1,12 +1,13 @@
 import opratorParser from './opratorParser.js'
+import { symbolObj } from './lisp.js'
 
 export default function valueParser(input){
-    input=input.trim()
+    input=input.trimStart()
     return ( opratorParser(input)||
+            symbolParser(input)||
             booleanParser(input)||
             numberParser(input)||
             StringParser(input))
-
 }
 
 //Boolean Parser
@@ -38,4 +39,10 @@ function StringParser(input){
         i++
     }
     return [input.slice(1,i),input.slice(i+1)];
+}
+
+function symbolParser(input){
+    let sym=input.slice(0,input.indexOf(" "))
+    if(!symbolObj[sym]) return null;
+    return [symbolObj[sym],input.slice(sym.length)]
 }

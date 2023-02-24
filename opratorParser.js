@@ -1,26 +1,27 @@
 import valueParser from './valueParser.js'
-
-const resolvedObj={
-    '+':(arr)=>arr.reduce((acc,curr)=>acc+curr),
-    '-':(arr)=>arr.reduce((acc,curr)=>acc-curr),
-    '*':(arr)=>arr.reduce((acc,curr)=>acc*curr),
-    '/':(arr)=>arr.reduce((acc,curr)=>curr/acc),
-    'mod':(arr)=>arr.reduce((acc,curr)=>curr%acc),
-    'incf':(arr)=>arr[0]+arr[1],
-    'decf':(arr)=>arr[0]-arr[1]
-}
+import specialForms from './specialForms.js';
+import { symbolObj } from './lisp.js';
 
 export default function operatorParser(input){
     if(!input.startsWith("("))return null;
     let opertator=input.slice(1,input.indexOf(" "));
     let rem=input.slice(opertator.length+1).trim();
     let arr=[]
-    while(!rem.startsWith(")")){
-        let val=valueParser(rem)
-        if(!val)return null
-        rem=val[1].trim()
-        arr.push(val[0])
+    if(specialForms[opertator]){
+        return specialForms[opertator](rem);
+    } 
+    else if(symbolObj[opertator]){
+        while(!rem.startsWith(")")){
+            let val=valueParser(rem)
+            if(!val)return null
+            rem=val[1].trim()
+            arr.push(val[0])
+        }
+    } 
+    else{
+        return null
     }
     if(rem[0]!==')')return null
-    return [resolvedObj[opertator](arr),rem.slice(1)]
+    return [symbolObj[opertator](arr),rem.slice(1)]
+    
 }
