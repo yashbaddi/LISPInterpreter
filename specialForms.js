@@ -1,45 +1,38 @@
-import opratorParser from './opratorParser.js'
-import { symbolObj } from './lisp.js'
-import valueParser from './valueParser.js';
+import expressionParser from "./expressionParser.js";
+import { symbolObj } from "./symbols.js";
+import valueParser from "./valueParser.js";
 
-let specialForms={
-    'define':(input)=>{
-        let pos=input.indexOf(" ")
-        let val=valueParser(input.slice(pos))
-        symbolObj[input.slice(0,pos)]=val[0]
-        return [0,val[1].slice(1)]
-    },
-    'quote':(input)=>{
-        let i=nextOperand(input)
-        return [input.slice(0,i),input.slice(i+1)]
-    },
-    'if':(input)=>{
-        let condn=valueParser(input)
-        
-        if(condn[0]){
-            return valueParser(condn[1])
-        }else{
-            return[0,condn[1].slice(nextOperand(input))]
-        }
-    },
-    'lambda':(input)=>{
-
-    },
-    'set!':(input)=>{
-
-    }
-    
+let specialForms = {
+  define: (key, val) => {
+    symbolObj[key] = valueParser(val)[0];
+    return 1;
+  },
+  quote: (input) => {
+    return input;
+  },
+  if: (condition, statement1, statement2) => {
+    if (valueParser(condition)) valueParser(statement1);
+    else valueParser(statement2);
+    return 1;
+  },
+  lambda: (params, defnition) => {
+    // let keyParameters = [];
+    // let i = 1;
+    // while (input[i] !== ")") {
+    //   let pos = input.indexOf(" ");
+    //   keyParameters.push(input.slice(i, pos).trim());
+    //   i = i + pos;
+    // }
+    // let func = (params) => {
+    //   Object.assign(
+    //     ...keyParameters.map((element, index) => ({ [element]: params[index] }))
+    //   );
+    //   valueParser(input);
+    //   Object.keys(params).forEach((ele) => delete symbolObj[ele]);
+    // };
+    // return [func, input.slice(nextOperand(input))];
+  },
+  "set!": (input) => {},
 };
-function nextOperand(input){
-    let parCheck=[];
-    parCheck.push('(')
-    let i=0
-    do{
-        if(input[i]==='(')parCheck.push('(')
-        if(input[i]===')')parCheck.pop();
-        i++
-    }while(parCheck.length!==0)
-    return i;
-}
 
 export default specialForms;
