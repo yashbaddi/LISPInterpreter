@@ -1,6 +1,6 @@
 import valueParser from "./valueParser.js";
 import * as readline from "node:readline";
-import { symbolObj } from "./symbols.js";
+import { globalEnv } from "./symbols.js";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -13,7 +13,9 @@ function lispint(input) {
   if (val[1] !== "") lispint(val[1].trim());
   return val[0];
 }
-console.log(lispint("(+ 10 10)"));
+// lispint("(define twice (lambda (x) (* 2 x)))");
+// lispint("(define repeat (lambda (f) (lambda (x) (f (f x)))))");
+// console.log(lispint("((repeat twice) 10)"));
 rl.setPrompt("LISP > ");
 rl.prompt();
 rl.on("line", (input) => {

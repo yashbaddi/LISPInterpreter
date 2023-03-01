@@ -1,6 +1,6 @@
 import valueParser from "./valueParser.js";
 
-export let symbolObj = {
+export let globalEnv = {
   "+": (arr) => arr.reduce((acc, curr) => acc + curr, 0),
   "-": (arr) => arr.reduce((acc, curr) => acc - curr),
   "*": (arr) => arr.reduce((acc, curr) => acc * curr, 1),

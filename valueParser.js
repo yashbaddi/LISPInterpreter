@@ -1,11 +1,11 @@
-import expressionParser from "./expressionParser.js";
-import { symbolObj } from "./symbols.js";
+import expressionParser, { parametersParser } from "./expressionParser.js";
+import { globalEnv } from "./symbols.js";
 
-export default function valueParser(input) {
+export default function valueParser(input, env = globalEnv) {
   input = input.trimStart();
   return (
-    expressionParser(input) ||
-    symbolParser(input) ||
+    expressionParser(input, env) ||
+    symbolParser(input, env) ||
     booleanParser(input) ||
     numberParser(input) ||
     StringParser(input)
@@ -43,7 +43,7 @@ function StringParser(input) {
   return [input.slice(1, i), input.slice(i + 1)];
 }
 
-function symbolParser(input) {
-  if (!symbolObj[input]) return null;
-  return [symbolObj[input], input.slice(input.length)];
+function symbolParser(input, env) {
+  if (!env[input]) return null;
+  return [env[input], input.slice(input.length)];
 }
