@@ -8,11 +8,19 @@ export let globalEnv = {
   mod: (arr) => arr.reduce((acc, curr) => curr % acc),
   incf: (arr) => arr[0] + arr[1],
   decf: (arr) => arr[0] - arr[1],
+  pi: Math.PI,
   ">": (arr) => arr[0] > arr[1],
   ">=": (arr) => arr[0] >= arr[1],
   "<": (arr) => arr[0] < arr[1],
   "<=": (arr) => arr[0] <= arr[1],
   "=": (arr) => arr[0] === arr[1],
+  abs: (arr) => Math.abs(arr[0]),
+  pow: (arr) => Math.pow(arr[0], arr[1]),
+  "equal?": (arr) => arr[0] === arr[1],
+  list: (arr) => arr,
+  cons: (arr) => arr[1].concat(arr[0]),
+  car: (arr) => arr[0][0],
+  cdr: (arr) => arr[0].slice(1),
 };
 
 // export let symbolObj = {

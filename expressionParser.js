@@ -1,24 +1,28 @@
-import valueParser from "./valueParser.js";
+import valueParser, { symbolParser } from "./valueParser.js";
 import specialForms from "./specialForms.js";
 import { globalEnv } from "./symbols.js";
 
 export default function expressionParser(input, env) {
   if (!input.startsWith("(")) return null;
-  let operator = input.slice(1, input.indexOf(" "));
-  let rem = input.slice(operator.length + 1).trim();
-  let arr = parametersParser(rem);
-
+  // let operator = input.slice(1, input.indexOf(" "));
+  // let rem = input.slice(operator.length + 1).trim();
+  let arr = parametersParser(input.slice(1).trim());
+  let operator = arr.shift();
   if (specialForms[operator]) {
-    return [specialForms[operator](...arr, env), rem.slice(1)];
+    return [specialForms[operator](...arr, env), ""];
   }
-  if (env[operator]) {
-    arr = arr.map((ele) => valueParser(ele, env)[0]);
-    return [env[operator](arr), rem.slice(1)];
-  }
+  operator = valueParser(operator, env);
+  // if (env[operator]) {
+  //   return [env[operator](arr), ""];
+  // }
+  return [expressionEvaluator(operator, arr, env), ""];
 
   throw new Error("Not a valid Operation");
 }
-
+function expressionEvaluator(operator, params, env) {
+  params = params.map((ele) => valueParser(ele, env)[0]);
+  return operator[0](params);
+}
 export function parametersParser(input) {
   let arr = [];
   while (!input.startsWith(")")) {

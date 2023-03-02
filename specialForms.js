@@ -18,13 +18,6 @@ let specialForms = {
     return 1;
   },
   lambda: (localparams, defnition, env) => {
-    // let keyParameters = [];
-    // let i = 1;
-    // while (input[i] !== ")") {
-    //   let pos = input.indexOf(" ");
-    //   keyParameters.push(input.slice(i, pos).trim());
-    //   i = i + pos;
-    // }
     let paramsArr = parametersParser(localparams.slice(1));
 
     let func = (params) => {

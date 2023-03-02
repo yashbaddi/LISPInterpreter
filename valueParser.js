@@ -43,7 +43,7 @@ function StringParser(input) {
   return [input.slice(1, i), input.slice(i + 1)];
 }
 
-function symbolParser(input, env) {
-  if (!env[input]) return null;
+export function symbolParser(input, env) {
+  if (env[input] == undefined) return null;
   return [env[input], input.slice(input.length)];
 }
