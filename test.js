@@ -2,6 +2,7 @@ import lispint from "./lisp.js";
 
 lispint("(define x 2)");
 console.log(lispint("(+ 1 1)"));
+// console.log(lispint("(dw 3 3 )"));
 console.log(lispint("(define circle-area (lambda (r) (* pi (* r r))))"));
 console.log(lispint("(circle-area 3)"));
 console.log(
@@ -24,7 +25,11 @@ console.log(
   )
 );
 lispint("(define twice (lambda (x) (* 2 x)))");
+console.log(lispint("(twice 5)"));
 lispint("(define repeat (lambda (f) (lambda (x) (f (f x)))))");
+console.log(lispint("((repeat twice) 10)"));
+console.log(lispint("((repeat (repeat twice)) 10)"));
+console.log(lispint("((repeat (repeat (repeat twice))) 10)"));
 console.log(lispint("((repeat (repeat (repeat (repeat twice)))) 10)"));
 console.log(lispint("(pow 2 16)"));
 console.log(
@@ -34,9 +39,10 @@ console.log(
 );
 console.log(
   lispint(
-    "(define range (lambda (a b) (if (= a b) (quote ()) (cons a (range (+ a 1) b)))))"
+    "(define range (lambda (a b) (if (= a b) 1 (cons a (range (+ a 1) b)))))"
   )
 );
+
 console.log(lispint("(range 0 10)"));
 console.log(lispint("(map fib (range 0 10))"));
 console.log(lispint("(map fib (range 0 20))"));

@@ -18,9 +18,19 @@ export let globalEnv = {
   pow: (arr) => Math.pow(arr[0], arr[1]),
   "equal?": (arr) => arr[0] === arr[1],
   list: (arr) => arr,
-  cons: (arr) => arr[1].concat(arr[0]),
-  car: (arr) => arr[0][0],
-  cdr: (arr) => arr[0].slice(1),
+  cons: (arr) => {
+    if (Array.isArray(arr[1])) return [arr[0], ...arr[1]];
+    return [arr[0], arr[1]];
+  },
+  car: (arr) => {
+    if (arr[0].length > 0) return arr[0][0];
+    return null;
+  },
+  cdr: (arr) => {
+    if (arr[0].length > 0) return arr[0].slice(1);
+    return null;
+  },
+  map: (arr) => arr[1].map((ele) => arr[0]([ele])),
 };
 
 // export let symbolObj = {

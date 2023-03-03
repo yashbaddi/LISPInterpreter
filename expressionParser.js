@@ -6,15 +6,13 @@ export default function expressionParser(input, env) {
   if (!input.startsWith("(")) return null;
   // let operator = input.slice(1, input.indexOf(" "));
   // let rem = input.slice(operator.length + 1).trim();
-  let arr = parametersParser(input.slice(1).trim());
+  let arr = parametersParser(input);
   let operator = arr.shift();
   if (specialForms[operator]) {
     return [specialForms[operator](...arr, env), ""];
   }
   operator = valueParser(operator, env);
-  // if (env[operator]) {
-  //   return [env[operator](arr), ""];
-  // }
+
   return [expressionEvaluator(operator, arr, env), ""];
 
   throw new Error("Not a valid Operation");
@@ -24,6 +22,8 @@ function expressionEvaluator(operator, params, env) {
   return operator[0](params);
 }
 export function parametersParser(input) {
+  if (!input.startsWith("(")) return null;
+  input = input.trim().slice(1);
   let arr = [];
   while (!input.startsWith(")")) {
     let pos = bracketsParser(input);
