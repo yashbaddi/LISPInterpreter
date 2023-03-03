@@ -32,18 +32,3 @@ export let globalEnv = {
   },
   map: (arr) => arr[1].map((ele) => arr[0]([ele])),
 };
-
-// export let symbolObj = {
-//   "+": (arr) => arr.reduce((acc, curr) => acc + valueParser(curr)[0], 0),
-//   "-": (arr) => arr.reduce((acc, curr) => acc - valueParser(curr)[0]),
-//   "*": (arr) => arr.reduce((acc, curr) => acc * valueParser(curr)[0], 1),
-//   "/": (arr) => arr.reduce((acc, curr) => valueParser(curr)[0] / acc),
-//   mod: (arr) => arr.reduce((acc, curr) => valueParser(curr)[0] % acc),
-//   incf: (arr) => valueParser(arr[0])[0] + valueParser(arr[1])[0],
-//   decf: (arr) => valueParser(arr[0])[0] - valueParser(arr[1])[0],
-//   ">": (arr) => valueParser(arr[0])[0] > valueParser(arr[1])[0],
-//   ">=": (arr) => valueParser(arr[0])[0] >= valueParser(arr[1])[0],
-//   "<": (arr) => valueParser(arr[0])[0] < valueParser(arr[1])[0],
-//   "<=": (arr) => valueParser(arr[0])[0] <= valueParser(arr[1])[0],
-//   "=": (arr) => valueParser(arr[0])[0] === valueParser(arr[1])[0],
-// };

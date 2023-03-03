@@ -1,4 +1,4 @@
-import expressionParser, { parametersParser } from "./expressionParser.js";
+import { parametersParser } from "./expressionParser.js";
 import { globalEnv } from "./symbols.js";
 import valueParser from "./valueParser.js";
 
@@ -9,7 +9,7 @@ let specialForms = {
     env[key] = valueParser(val)[0];
   },
   quote: (input, env) => {
-    console.log(input);
+    return input[0];
   },
   if: (condition, statement1, statement2, env) => {
     if (valueParser(condition, env)[0]) return valueParser(statement1, env)[0];
@@ -31,7 +31,7 @@ let specialForms = {
   "set!": (key, val, env) => {
     if (env[key]) {
       env[key] = valueParser(val)[0];
-    }
+    } else throw new Error(key + " is not defined");
   },
 };
 

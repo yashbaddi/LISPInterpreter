@@ -1,6 +1,6 @@
 import lispint from "./lisp.js";
 
-lispint("(define x 2)");
+// lispint("()");
 console.log(lispint("(+ 1 1)"));
 // console.log(lispint("(dw 3 3 )"));
 console.log(lispint("(define circle-area (lambda (r) (* pi (* r r))))"));

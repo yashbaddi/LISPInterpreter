@@ -1,36 +1,29 @@
 import valueParser, { symbolParser } from "./valueParser.js";
 import specialForms from "./specialForms.js";
-import { globalEnv } from "./symbols.js";
 
 export default function expressionParser(input, env) {
   if (!input.startsWith("(")) return null;
-  // let operator = input.slice(1, input.indexOf(" "));
-  // let rem = input.slice(operator.length + 1).trim();
   let arr = parametersParser(input);
   let operator = arr.shift();
   if (specialForms[operator]) {
     return [specialForms[operator](...arr, env), ""];
   }
   operator = valueParser(operator, env);
+  if (operator[0] != null) return [expressionEvaluator(operator, arr, env), ""];
 
-  return [expressionEvaluator(operator, arr, env), ""];
+  throw new Error("Not a valid Operator");
+}
 
-  throw new Error("Not a valid Operation");
-}
-function expressionEvaluator(operator, params, env) {
-  params = params.map((ele) => valueParser(ele, env)[0]);
-  return operator[0](params);
-}
 export function parametersParser(input) {
   if (!input.startsWith("(")) return null;
   input = input.trim().slice(1);
   let arr = [];
-  while (!input.startsWith(")")) {
+  while (!input.startsWith(")") && input !== "") {
     let pos = bracketsParser(input);
     arr.push(input.slice(0, pos));
     input = input.slice(pos).trim();
   }
-  if (input[0] !== ")") return null;
+  if (input[0] !== ")") throw new Error("Unequal Paranthisis");
   return arr;
 }
 
@@ -41,14 +34,13 @@ function bracketsParser(input) {
   while (count > 0 || !(input[i] === " " || input[i] === ")")) {
     if (input[i] === "(") count++;
     if (input[i] === ")") count--;
+    if (input[i] == undefined) throw new Error("Unequal Paranthisis");
     i++;
   }
   return i;
 }
 
-// while (!rem.startsWith(")")) {
-//   let val = valueParser(rem);
-//   if (!val) return null;
-//   rem = val[1].trim();
-//   arr.push(val[0]);
-// }
+function expressionEvaluator(operator, params, env) {
+  params = params.map((ele) => valueParser(ele, env)[0]);
+  return operator[0](params);
+}

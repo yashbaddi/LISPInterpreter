@@ -1,7 +1,5 @@
 import valueParser from "./valueParser.js";
 import * as readline from "node:readline";
-import { globalEnv } from "./symbols.js";
-import { linkSync } from "node:fs";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -18,7 +16,8 @@ export default function lispint(input) {
 rl.setPrompt("LISP > ");
 rl.prompt();
 rl.on("line", (input) => {
-  if (input == "exit()") rl.close();
   console.log(lispint(input));
   rl.prompt();
 });
+
+rl.on("SIGINT", () => rl.pause());
