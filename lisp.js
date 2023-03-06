@@ -1,5 +1,6 @@
 import valueParser from "./valueParser.js";
 import * as readline from "node:readline";
+import { globalEnv } from "./symbols.js";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -7,7 +8,7 @@ const rl = readline.createInterface({
 });
 
 export default function lispint(input) {
-  let val = valueParser(input);
+  let val = valueParser(globalEnv, input);
   if (!val) return "Not a valid LISP Program";
   if (val[1] !== "") lispint(val[1].trim());
   return val[0];

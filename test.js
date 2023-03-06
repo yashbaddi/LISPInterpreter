@@ -39,7 +39,7 @@ console.log(
 );
 console.log(
   lispint(
-    "(define range (lambda (a b) (if (= a b) 1 (cons a (range (+ a 1) b)))))"
+    "(define range (lambda (a b) (if (= a b) (quote ()) (cons a (range (+ a 1) b)))))"
   )
 );
 

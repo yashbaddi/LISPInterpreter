@@ -1,19 +1,18 @@
-import expressionParser, { parametersParser } from "./expressionParser.js";
+import expressionParser, { listParser } from "./expressionParser.js";
 import { globalEnv } from "./symbols.js";
 
-export default function valueParser(input, env = globalEnv) {
-  // input = input.trimStart();
+export default function valueParser(env = globalEnv, input) {
   return (
-    expressionParser(input, env) ||
+    expressionParser(env, input) ||
     numberParser(input) ||
-    symbolParser(input, env) ||
+    symbolParser(env, input) ||
     booleanParser(input) ||
     StringParser(input)
   );
 }
 
 //Symbol Parser
-export function symbolParser(input, env) {
+export function symbolParser(env, input) {
   if (env[input] == undefined) return null;
   return [env[input], input.slice(input.length)];
 }
