@@ -19,13 +19,14 @@ let specialForms = {
   },
   lambda: (env, localparams, defnition) => {
     let paramsArr = listParser(localparams);
+    if (paramsArr) return [null, "Error:Unequal Paratisis"];
 
     let func = (params) => {
       const localEnv = Object.create(env);
       for (let i = 0; i < params.length; i++) {
         localEnv[paramsArr[i]] = params[i];
       }
-      return valueParser(localEnv, defnition)[0];
+      return [valueParser(localEnv, defnition)[0], paramsArr.length];
     };
     return func;
   },

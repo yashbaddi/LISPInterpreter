@@ -11,7 +11,7 @@ export default function expressionParser(env, input) {
   }
   const operatorFunction = valueParser(env, operator)[0];
   if (operatorFunction && typeof operatorFunction === "function") {
-    return [expressionEvaluator(env, operatorFunction, arr), ""];
+    return expressionEvaluator(env, operatorFunction, arr);
   }
   return [null, "Error:Not a proper Operator"];
 }
@@ -44,5 +44,19 @@ function bracketsParser(input) {
 
 export function expressionEvaluator(env, operatorFunction, params) {
   params = params.map((ele) => valueParser(env, ele)[0]);
-  return operatorFunction(params);
+  const evaluatedExpression = operatorFunction(params);
+  if (
+    evaluatedExpression[1] === params.length ||
+    evaluatedExpression[1] === undefined
+  ) {
+    return [evaluatedExpression[0], ""];
+  }
+
+  return [
+    null,
+    "Error:Required Params:" +
+      evaluatedExpression[1] +
+      " Given:" +
+      params.length,
+  ];
 }

@@ -2,7 +2,8 @@
 
 ### ChangeLog
 
--Handeled Error On Unequal Parantisis it even returns null with error as array
+- Handeled Error On Unequal Parantisis it even returns null with error as array
+- Handled Error on More/Less Params
 
 ### Things to do / Known Issues
 
@@ -12,11 +13,10 @@
 - [ ] Handling unnessary parentisis
 - [x] ~~Handling Unequal Parentisis~~
 - [ ] ~~Handling Wrong Operator~~
-- [ ] Handling less than required params
-- [ ] Handling More than required params
+- [x] ~~Handling less than required params~~
+- [x] ~~Handling More than required params~~
 - [ ] Multiple expressions in single line
 - [ ] Cleaning the code
-- [ ]
 
 ### Review Feedback
 
@@ -25,5 +25,5 @@
 - ~~env should be the first param~~
 - ~~Handling improper operator defnition~~
 - Issues with error handling
-- return same types
-- Writing Pure Functions
+- ~~return same types~~
+- ~~Writing Pure Functions~~
