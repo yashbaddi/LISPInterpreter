@@ -2,18 +2,21 @@
 
 ### ChangeLog
 
-- Added working Quote Function that could handle list
-- Renamed ParameterParser to list parser
-- Changed let to const where needed
+-Handeled Error On Unequal Parantisis it even returns null with error as array
 
-### Things to do
+### Things to do / Known Issues
 
 - [x] ~~Lambda functions not working with functions as parameters~~
 - [x] ~~if condition isn't working for empty list~~
 - [x] ~~Quote Not behaving as a list~~
-- [ ] More than required params inserted not handled
+- [ ] Handling unnessary parentisis
+- [x] ~~Handling Unequal Parentisis~~
+- [ ] ~~Handling Wrong Operator~~
+- [ ] Handling less than required params
+- [ ] Handling More than required params
 - [ ] Multiple expressions in single line
 - [ ] Cleaning the code
+- [ ]
 
 ### Review Feedback
 

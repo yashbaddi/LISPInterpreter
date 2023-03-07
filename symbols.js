@@ -4,7 +4,7 @@ export const globalEnv = {
   "*": (arr) => arr.reduce((acc, curr) => acc * curr, 1),
   "/": (arr) => arr.reduce((acc, curr) => curr / acc),
   mod: (arr) => arr.reduce((acc, curr) => curr % acc),
-  incf: (arr) => arr[0] + arr[1],
+  incf: (arr) => [arr[0] + arr[1]],
   decf: (arr) => arr[0] - arr[1],
   pi: Math.PI,
   ">": (arr) => arr[0] > arr[1],

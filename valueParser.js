@@ -36,7 +36,7 @@ function booleanParser(input) {
 function StringParser(input) {
   input = input.trim();
   let a = new Set(['"', "\\", "/", "b", "f", "n", "r", "t", "u"]);
-  if (!input.startsWith('"')) return [null, ""];
+  if (!input.startsWith('"')) return [null, "Error: Unknown Identifier"];
   let i = 1;
   while (input[i] != '"') {
     if (input.charCodeAt(i) === 9 || input.charCodeAt(i) === 10) return null;

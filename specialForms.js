@@ -32,11 +32,12 @@ let specialForms = {
   "set!": (env, key, val) => {
     if (env[key]) {
       env[key] = valueParser(env, val)[0];
-    } else throw new Error(key + " is not defined");
+    } else return [null, "Error:Key Does not Exist"];
   },
-  eval: (env, input) => {
-    return expressionEvaluator(env, input[0], input.slice(1));
-  },
+  // eval: (env, input) => {
+  //   const val = valueParser(env, input)[0];
+  //   return expressionEvaluator(env, val[0], val.slice(1));
+  // },
 };
 
 export default specialForms;
