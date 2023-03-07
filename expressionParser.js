@@ -3,29 +3,37 @@ import specialForms from "./specialForms.js";
 
 export default function expressionParser(env, input) {
   if (!input.startsWith("(")) return null;
+
   const arr = listParser(input);
   if (!arr) return [null, "Error:Unequal Paratisis"];
+
   const operator = arr.shift();
   if (specialForms[operator]) {
     return [specialForms[operator](env, ...arr), ""];
   }
+
   const operatorFunction = valueParser(env, operator)[0];
   if (operatorFunction && typeof operatorFunction === "function") {
     return expressionEvaluator(env, operatorFunction, arr);
   }
+
   return [null, "Error:Not a proper Operator"];
 }
 
 export function listParser(input) {
   if (!input.startsWith("(")) return null;
+
   input = input.trim().slice(1);
   const arr = [];
   while (!input.startsWith(")") && input !== "") {
     const pos = bracketsParser(input);
+
     if (!pos) return null;
+
     arr.push(input.slice(0, pos));
     input = input.slice(pos).trim();
   }
+
   return arr;
 }
 
@@ -60,3 +68,6 @@ export function expressionEvaluator(env, operatorFunction, params) {
       params.length,
   ];
 }
+
+console.log(listParser("( sad ( if ( = 1 1 ) 1 2 ) ( jkh  ( kjh dsa ) oiu ))"));
+// [ 'sad', 'asd', '( jkh  ( kjh dsa ) oiu )']
