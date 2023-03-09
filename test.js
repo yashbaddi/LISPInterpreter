@@ -3,7 +3,7 @@ import lispint from "./lisp.js";
 // lispint("()");
 console.log(lispint("(+ 1 1)"));
 // console.log(lispint("(dw 3 3 )"));
-console.log(lispint("(define circle-area (lambda (r) (* pi (* r r))))"));
+console.log(lispint("(define circle-area (lambda (r) (* pi (* r r ))))"));
 console.log(lispint("(circle-area 3)"));
 console.log(
   lispint("(define fact (lambda (n) (if (<= n 1) 1 (* n (fact (- n 1))))))")

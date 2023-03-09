@@ -4,25 +4,39 @@ import specialForms from "./specialForms.js";
 export default function expressionParser(env, input) {
   if (!input.startsWith("(")) return null;
 
-  const arr = listParser(input);
-  if (!arr) return [null, "Error:Unequal Paratisis"];
+  input = input.slice(1);
 
-  const operator = arr.shift();
-  if (specialForms[operator]) {
-    return [specialForms[operator](env, ...arr), ""];
+  //Check In Special Forms
+  let operator;
+  if ((operator = /^(define|if|quote|lambda)/.exec(input))) {
+    return specialForms[operator[0]](env, input.slice(operator[0].length));
   }
 
-  const operatorFunction = valueParser(env, operator)[0];
-  if (operatorFunction && typeof operatorFunction === "function") {
-    return expressionEvaluator(env, operatorFunction, arr);
+  //If not a speical Forms
+  //Get the operator
+  const parseredOperator =
+    expressionParser(env, input) || symbolParser(env, input);
+  if (!parseredOperator) return [null, "Error Invalid Operator"];
+  operator = parseredOperator[0];
+  input = parseredOperator[1];
+
+  //Get the operands
+  const operands = [];
+  while (!input.startsWith(")")) {
+    const operandValue = valueParser(env, input);
+    operands.push(operandValue[0]);
+    input = operandValue[1].trim();
   }
 
-  return [null, "Error:Not a proper Operator"];
+  //Call the evaluator
+  return [expressionEvaluator(env, operator, operands), input.slice(1)];
 }
 
 export function listParser(input) {
+  //Takes a string as input and returns a list of strings which includes
+  //different elements. It oprates just like lisp's Quote.
+  input = input.trim();
   if (!input.startsWith("(")) return null;
-
   input = input.trim().slice(1);
   const arr = [];
   while (!input.startsWith(")") && input !== "") {
@@ -33,12 +47,12 @@ export function listParser(input) {
     arr.push(input.slice(0, pos));
     input = input.slice(pos).trim();
   }
+  if (input == "") return null;
 
-  return arr;
+  return [arr, input.slice(1)];
 }
 
-function bracketsParser(input) {
-  input = input.trim();
+export function bracketsParser(input) {
   let count = 0;
   let i = 0;
   while (count > 0 || !(input[i] === " " || input[i] === ")")) {
@@ -51,13 +65,12 @@ function bracketsParser(input) {
 }
 
 export function expressionEvaluator(env, operatorFunction, params) {
-  params = params.map((ele) => valueParser(env, ele)[0]);
   const evaluatedExpression = operatorFunction(params);
   if (
     evaluatedExpression[1] === params.length ||
     evaluatedExpression[1] === undefined
   ) {
-    return [evaluatedExpression[0], ""];
+    return evaluatedExpression[0];
   }
 
   return [
@@ -69,5 +82,5 @@ export function expressionEvaluator(env, operatorFunction, params) {
   ];
 }
 
-console.log(listParser("( sad ( if ( = 1 1 ) 1 2 ) ( jkh  ( kjh dsa ) oiu ))"));
+// console.log(listParser("( sad ( if ( = 1 1 ) 1 2 ) ( jkh  ( kjh dsa ) oiu ))"));
 // [ 'sad', 'asd', '( jkh  ( kjh dsa ) oiu )']

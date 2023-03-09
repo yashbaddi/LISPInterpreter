@@ -1,25 +1,40 @@
-import { listParser, expressionEvaluator } from "./expressionParser.js";
+import {
+  listParser,
+  bracketsParser,
+  expressionEvaluator,
+} from "./expressionParser.js";
 import { globalEnv } from "./symbols.js";
 import valueParser from "./valueParser.js";
 
 const env = globalEnv;
 
 let specialForms = {
-  define: (env, key, val) => {
-    env[key] = valueParser(env, val)[0];
-    return env[key];
+  define: (env, input) => {
+    input = input.trim();
+    const pos = input.indexOf(" ");
+    const val = valueParser(env, input.slice(pos));
+    env[input.slice(0, pos)] = val[0];
+    return [val[0], val[1].slice(1)];
   },
   quote: (env, input) => {
-    const quotedOutput = listParser(input) || input;
+    const quotedOutput = listParser(input)[0] || input;
     return quotedOutput;
   },
-  if: (env, condition, statement1, statement2) => {
-    if (valueParser(env, condition)[0]) return valueParser(env, statement1)[0];
-    return valueParser(env, statement2)[0];
+  if: (env, input) => {
+    let condition;
+    [condition, input] = valueParser(env, input);
+    if (condition) {
+      return valueParser(env, input);
+    }
+    input = input.trim().slice(bracketsParser(input.trim()));
+    return valueParser(env, input);
   },
-  lambda: (env, localparams, defnition) => {
-    let paramsArr = listParser(localparams);
-    if (paramsArr) return [null, "Error:Unequal Paratisis"];
+  lambda: (env, input) => {
+    let paramsArr;
+    [paramsArr, input] = listParser(input);
+    input = input.trim();
+    if (!paramsArr) return [null, "Error:Unequal Paratisis"];
+    const defnition = input.slice(0, bracketsParser(input));
 
     let func = (params) => {
       const localEnv = Object.create(env);
@@ -28,13 +43,13 @@ let specialForms = {
       }
       return [valueParser(localEnv, defnition)[0], paramsArr.length];
     };
-    return func;
+    return [func, input.slice(defnition.length + 1)];
   },
-  "set!": (env, key, val) => {
-    if (env[key]) {
-      env[key] = valueParser(env, val)[0];
-    } else return [null, "Error:Key Does not Exist"];
-  },
+  // "set!": (env, input) => {
+  //   if (env[key]) {
+  //     env[key] = valueParser(env, val)[0];
+  //   } else return [null, "Error:Key Does not Exist"];
+  // },
   // eval: (env, input) => {
   //   const val = valueParser(env, input)[0];
   //   return expressionEvaluator(env, val[0], val.slice(1));

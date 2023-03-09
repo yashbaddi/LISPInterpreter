@@ -2,6 +2,7 @@ import expressionParser, { listParser } from "./expressionParser.js";
 import { globalEnv } from "./symbols.js";
 
 export default function valueParser(env = globalEnv, input) {
+  input = input.trim();
   return (
     expressionParser(env, input) ||
     numberParser(input) ||
@@ -13,8 +14,14 @@ export default function valueParser(env = globalEnv, input) {
 
 //Symbol Parser
 export function symbolParser(env, input) {
-  if (env[input] == undefined) return null;
-  return [env[input], input.slice(input.length)];
+  // const symbol = input.slice(0, input.indexOf(" "));
+  let i = 0;
+  while (!(input[i] === " " || input[i] === ")" || input[i] === undefined)) {
+    i++;
+  }
+  const symbol = input.slice(0, i);
+  if (env[symbol] == undefined) return null;
+  return [env[symbol], input.slice(symbol.length)];
 }
 
 //Number Parser
@@ -47,4 +54,11 @@ function StringParser(input) {
     i++;
   }
   return [input.slice(1, i), input.slice(i + 1)];
+}
+
+//WhiteSpace Parser
+function whiteSpaceParser(input) {
+  if (!input.startsWith(" ")) return null;
+  let i = 1;
+  while (input[i] !== " ") {}
 }
