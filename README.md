@@ -7,7 +7,8 @@
 ### Things to do / Known Issues
 
 - [x] ~~If condition Not working~~
-- [ ] Quote not working
+- [x] ~~Quote not working~~
+- [ ] Create A whiteSpace parser
 
 ### Review Feedback
 

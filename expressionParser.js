@@ -84,3 +84,4 @@ export function expressionEvaluator(env, operatorFunction, params) {
 
 // console.log(listParser("( sad ( if ( = 1 1 ) 1 2 ) ( jkh  ( kjh dsa ) oiu ))"));
 // [ 'sad', 'asd', '( jkh  ( kjh dsa ) oiu )']
+// console.log(bracketsParser("hey there this is yash"));

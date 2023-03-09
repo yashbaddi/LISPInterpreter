@@ -17,8 +17,13 @@ let specialForms = {
     return [val[0], val[1].slice(1)];
   },
   quote: (env, input) => {
-    const quotedOutput = listParser(input)[0] || input;
-    return quotedOutput;
+    input = input.trim();
+    let quotedOutput;
+    if ((quotedOutput = listParser(input))) {
+      return quotedOutput;
+    }
+    const pos = bracketsParser(input);
+    return [input.slice(0, pos), input.slice(pos + 1)];
   },
   if: (env, input) => {
     let condition;
@@ -55,6 +60,7 @@ let specialForms = {
   //   return expressionEvaluator(env, val[0], val.slice(1));
   // },
 };
+// console.log(specialForms["quote"](env, "(this is the form of god)"));
 
 export default specialForms;
 
