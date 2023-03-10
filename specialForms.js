@@ -4,20 +4,21 @@ import {
   expressionEvaluator,
 } from "./expressionParser.js";
 import { globalEnv } from "./symbols.js";
-import valueParser from "./valueParser.js";
+import valueParser, { whiteSpaceParser } from "./valueParser.js";
 
 const env = globalEnv;
 
 let specialForms = {
   define: (env, input) => {
-    input = input.trim();
+    input = whiteSpaceParser(input);
     const pos = input.indexOf(" ");
     const val = valueParser(env, input.slice(pos));
+    if (!val[0]) return val;
     env[input.slice(0, pos)] = val[0];
     return [val[0], val[1].slice(1)];
   },
   quote: (env, input) => {
-    input = input.trim();
+    input = whiteSpaceParser(input);
     let quotedOutput;
     if ((quotedOutput = listParser(input))) {
       return quotedOutput;
@@ -31,13 +32,15 @@ let specialForms = {
     if (condition) {
       return valueParser(env, input);
     }
-    input = input.trim().slice(bracketsParser(input.trim()));
+    input = whiteSpaceParser(input).slice(
+      bracketsParser(whiteSpaceParser(input))
+    );
     return valueParser(env, input);
   },
   lambda: (env, input) => {
     let paramsArr;
     [paramsArr, input] = listParser(input);
-    input = input.trim();
+    input = whiteSpaceParser(input);
     if (!paramsArr) return [null, "Error:Unequal Paratisis"];
     const defnition = input.slice(0, bracketsParser(input));
 

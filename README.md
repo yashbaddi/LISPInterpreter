@@ -8,7 +8,7 @@
 
 - [x] ~~If condition Not working~~
 - [x] ~~Quote not working~~
-- [ ] Create A whiteSpace parser
+- [x] ~~Create A whiteSpace parser~~
 
 ### Review Feedback
 

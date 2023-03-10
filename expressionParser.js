@@ -1,23 +1,28 @@
-import valueParser, { symbolParser } from "./valueParser.js";
+import valueParser, { symbolParser, whiteSpaceParser } from "./valueParser.js";
 import specialForms from "./specialForms.js";
 
 export default function expressionParser(env, input) {
   if (!input.startsWith("(")) return null;
 
   input = input.slice(1);
+  input = whiteSpaceParser(input);
 
-  //Check In Special Forms
-  let operator;
-  if ((operator = /^(define|if|quote|lambda)/.exec(input))) {
-    return specialForms[operator[0]](env, input.slice(operator[0].length));
+  //Check For Special Forms
+  const operatorMatch = /^(define|if|quote|lambda)/.exec(input);
+  if (operatorMatch) {
+    return specialForms[operatorMatch[0]](
+      env,
+      input.slice(operatorMatch[0].length)
+    );
   }
 
-  //If not a speical Forms
+  //Not a speical Forms?
   //Get the operator
   const parseredOperator =
     expressionParser(env, input) || symbolParser(env, input);
-  if (!parseredOperator) return [null, "Error Invalid Operator"];
-  operator = parseredOperator[0];
+  if (!parseredOperator || typeof parseredOperator[0] !== "function")
+    return [null, "Error Invalid Operator"];
+  const operator = parseredOperator[0];
   input = parseredOperator[1];
 
   //Get the operands
@@ -25,7 +30,8 @@ export default function expressionParser(env, input) {
   while (!input.startsWith(")")) {
     const operandValue = valueParser(env, input);
     operands.push(operandValue[0]);
-    input = operandValue[1].trim();
+    input = operandValue[1];
+    input = whiteSpaceParser(input);
   }
 
   //Call the evaluator
@@ -35,9 +41,9 @@ export default function expressionParser(env, input) {
 export function listParser(input) {
   //Takes a string as input and returns a list of strings which includes
   //different elements. It oprates just like lisp's Quote.
-  input = input.trim();
+  input = whiteSpaceParser(input);
   if (!input.startsWith("(")) return null;
-  input = input.trim().slice(1);
+  input = whiteSpaceParser(input).slice(1);
   const arr = [];
   while (!input.startsWith(")") && input !== "") {
     const pos = bracketsParser(input);

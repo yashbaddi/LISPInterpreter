@@ -2,7 +2,7 @@ import expressionParser, { listParser } from "./expressionParser.js";
 import { globalEnv } from "./symbols.js";
 
 export default function valueParser(env = globalEnv, input) {
-  input = input.trim();
+  input = whiteSpaceParser(input);
   return (
     expressionParser(env, input) ||
     numberParser(input) ||
@@ -15,6 +15,7 @@ export default function valueParser(env = globalEnv, input) {
 //Symbol Parser
 export function symbolParser(env, input) {
   // const symbol = input.slice(0, input.indexOf(" "));
+  input = whiteSpaceParser(input);
   let i = 0;
   while (!(input[i] === " " || input[i] === ")" || input[i] === undefined)) {
     i++;
@@ -41,9 +42,9 @@ function booleanParser(input) {
 
 //String Parser
 function StringParser(input) {
-  input = input.trim();
+  input = whiteSpaceParser(input);
   let a = new Set(['"', "\\", "/", "b", "f", "n", "r", "t", "u"]);
-  if (!input.startsWith('"')) return [null, "Error: Unknown Identifier"];
+  if (!input.startsWith('"')) return [null, " Error: Unknown Identifier"];
   let i = 1;
   while (input[i] != '"') {
     if (input.charCodeAt(i) === 9 || input.charCodeAt(i) === 10) return null;
@@ -57,8 +58,10 @@ function StringParser(input) {
 }
 
 //WhiteSpace Parser
-function whiteSpaceParser(input) {
-  if (!input.startsWith(" ")) return null;
-  let i = 1;
-  while (input[i] !== " ") {}
+export function whiteSpaceParser(input) {
+  let i = 0;
+  while (/^\s/.test(input[i])) {
+    i++;
+  }
+  return input.slice(i);
 }
