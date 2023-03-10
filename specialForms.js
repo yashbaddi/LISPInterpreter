@@ -1,6 +1,6 @@
 import { listParser, expressionEvaluator } from "./expressionParser.js";
 import { globalEnv } from "./symbols.js";
-import valueParser from "./valueParser.js";
+import valueParser, { whiteSpaceParser } from "./valueParser.js";
 
 const env = globalEnv;
 
@@ -11,15 +11,16 @@ let specialForms = {
   },
   quote: (env, input) => {
     const quotedOutput = listParser(input) || input;
-    return quotedOutput;
+
+    return Array.isArray(quotedOutput) ? quotedOutput[0] : quotedOutput;
   },
   if: (env, condition, statement1, statement2) => {
     if (valueParser(env, condition)[0]) return valueParser(env, statement1)[0];
     return valueParser(env, statement2)[0];
   },
   lambda: (env, localparams, defnition) => {
-    let paramsArr = listParser(localparams);
-    if (paramsArr) return [null, "Error:Unequal Paratisis"];
+    let paramsArr = listParser(localparams)[0];
+    if (paramsArr == null) return [null, "Error:Unequal Paratisis"];
 
     let func = (params) => {
       const localEnv = Object.create(env);

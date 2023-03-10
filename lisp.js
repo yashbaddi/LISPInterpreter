@@ -10,7 +10,7 @@ const rl = readline.createInterface({
 export default function lispint(input) {
   let val = valueParser(globalEnv, input);
   if (val[0] == null) return val[1];
-  if (val[1] !== "") lispint(val[1].trim());
+  if (val[1] !== "") console.log(lispint(val[1].trim()));
   return val[0];
 }
 

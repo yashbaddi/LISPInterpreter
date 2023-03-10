@@ -2,8 +2,7 @@
 
 ### ChangeLog
 
-- Handeled Error On Unequal Parantisis it even returns null with error as array
-- Handled Error on More/Less Params
+-Added WhiteSpace Parser
 
 ### Things to do / Known Issues
 
@@ -15,8 +14,8 @@
 - [ ] ~~Handling Wrong Operator~~
 - [x] ~~Handling less than required params~~
 - [x] ~~Handling More than required params~~
-- [ ] Multiple expressions in single line
-- [ ] Cleaning the code
+- [x] ~~Multiple expressions in single line~~
+- [x] Cleaning the code
 
 ### Review Feedback
 

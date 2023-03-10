@@ -13,6 +13,7 @@ export default function valueParser(env = globalEnv, input) {
 
 //Symbol Parser
 export function symbolParser(env, input) {
+  input = whiteSpaceParser(input);
   if (env[input] == undefined) return null;
   return [env[input], input.slice(input.length)];
 }
@@ -34,7 +35,7 @@ function booleanParser(input) {
 
 //String Parser
 function StringParser(input) {
-  input = input.trim();
+  input = whiteSpaceParser(input);
   let a = new Set(['"', "\\", "/", "b", "f", "n", "r", "t", "u"]);
   if (!input.startsWith('"')) return [null, "Error: Unknown Identifier"];
   let i = 1;
@@ -47,4 +48,13 @@ function StringParser(input) {
     i++;
   }
   return [input.slice(1, i), input.slice(i + 1)];
+}
+
+//WhiteSpace Parser
+export function whiteSpaceParser(input) {
+  let i = 0;
+  while (/^\s/.test(input[i])) {
+    i++;
+  }
+  return input.slice(i);
 }
