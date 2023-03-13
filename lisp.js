@@ -16,7 +16,7 @@ export default function lispint(input) {
 }
 
 // console.log(lispint("(define 2x 2)"));
-console.log(lispint("(+ 2 2 )"));
+console.log(lispint("(define x 2"));
 
 rl.setPrompt("LISP > ");
 rl.prompt();

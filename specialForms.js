@@ -10,12 +10,13 @@ const env = globalEnv;
 
 let specialForms = {
   define: (env, input) => {
+    if (!input.startsWith(" ")) return null; //Space After Operator
     input = whiteSpaceParser(input);
     const pos = input.indexOf(" ");
-    const val = valueParser(env, input.slice(pos));
-    if (!val[0]) return val;
+    const val = valueParser(env, whiteSpaceParser(input.slice(pos)));
+    if (val === null) return null;
     env[input.slice(0, pos)] = val[0];
-    return [val[0], val[1].slice(1)];
+    return val; //handle errors
   },
   quote: (env, input) => {
     input = whiteSpaceParser(input);
@@ -24,24 +25,34 @@ let specialForms = {
       return quotedOutput;
     }
     const pos = bracketsParser(input);
-    return [input.slice(0, pos), input.slice(pos + 1)];
+    return [input.slice(0, pos), input.slice(pos)];
   },
   if: (env, input) => {
-    let condition;
+    let condition, value;
+    if (!input.startsWith(" ")) return null;
+    input = whiteSpaceParser(input);
     [condition, input] = valueParser(env, input);
+    input = whiteSpaceParser(input);
+
     if (condition) {
-      return valueParser(env, input);
+      [value, input] = valueParser(env, input);
+
+      if (!input.startsWith(" ")) return null;
+      input = whiteSpaceParser(input);
+      input = input.slice(bracketsParser(input));
+
+      return [value, input]; //Correct Way
     }
-    input = whiteSpaceParser(input).slice(
-      bracketsParser(whiteSpaceParser(input))
-    );
-    return valueParser(env, input);
+
+    input = input.slice(bracketsParser(input));
+    [value, input] = valueParser(env, input);
+    return [value, input];
   },
   lambda: (env, input) => {
     let paramsArr;
     [paramsArr, input] = listParser(input);
     input = whiteSpaceParser(input);
-    if (!paramsArr) return [null, "Error:Unequal Paratisis"];
+    if (!paramsArr) return null;
     const defnition = input.slice(0, bracketsParser(input));
 
     let func = (params) => {
@@ -51,20 +62,11 @@ let specialForms = {
       }
       return [valueParser(localEnv, defnition)[0], paramsArr.length];
     };
-    return [func, input.slice(defnition.length + 1)];
+    return [func, input.slice(defnition.length)];
   },
-  // "set!": (env, input) => {
-  //   if (env[key]) {
-  //     env[key] = valueParser(env, val)[0];
-  //   } else return [null, "Error:Key Does not Exist"];
-  // },
-  // eval: (env, input) => {
-  //   const val = valueParser(env, input)[0];
-  //   return expressionEvaluator(env, val[0], val.slice(1));
-  // },
 };
-// console.log(specialForms["quote"](env, "(this is the form of god)"));
 
 export default specialForms;
 
-// console.log(specialForms["eval"](env, ["+", "1", "2"]));
+specialForms["define"](env, " x 2)");
+specialForms["if"](env, " #t (if #f 3 2) 7)");

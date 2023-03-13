@@ -27,6 +27,7 @@ export function symbolParser(env, input) {
 
 //Number Parser
 function numberParser(input) {
+  input = whiteSpaceParser(input);
   let re = /^-?([1-9](\d)*|0)(\.(\d)+)?([eE][+-]?(\d)+)?/;
   let n = input.match(re);
   if (!n) return null;
@@ -35,6 +36,7 @@ function numberParser(input) {
 
 //Boolean Parser
 function booleanParser(input) {
+  input = whiteSpaceParser(input);
   if (input.startsWith("#t")) return [true, input.slice(2)];
   if (input.startsWith("#f")) return [false, input.slice(2)];
   return null;
@@ -44,7 +46,7 @@ function booleanParser(input) {
 function StringParser(input) {
   input = whiteSpaceParser(input);
   let a = new Set(['"', "\\", "/", "b", "f", "n", "r", "t", "u"]);
-  if (!input.startsWith('"')) return [null, " Error: Unknown Identifier"];
+  if (!input.startsWith('"')) return [null, "Error: Unknown Identifier"];
   let i = 1;
   while (input[i] != '"') {
     if (input.charCodeAt(i) === 9 || input.charCodeAt(i) === 10) return null;
