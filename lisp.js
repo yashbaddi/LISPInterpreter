@@ -9,12 +9,14 @@ const rl = readline.createInterface({
 
 export default function lispint(input) {
   let val = valueParser(globalEnv, input);
-  if (!val[0]) return val[1];
-  if (val[1] !== "") lispint(val[1].trim());
+  if (val[0] === null) return val[1];
+  if (val[1] !== "") console.log(lispint(val[1].trim()));
+
   return val[0];
 }
 
-lispint("(define x 2))");
+// console.log(lispint("(define 2x 2)"));
+console.log(lispint("(define x 2"));
 
 rl.setPrompt("LISP > ");
 rl.prompt();

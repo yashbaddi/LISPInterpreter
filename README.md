@@ -2,21 +2,13 @@
 
 ### ChangeLog
 
--Handeled Error On Unequal Parantisis it even returns null with error as array
+- Merging parsing and evalutaor
 
 ### Things to do / Known Issues
 
-- [x] ~~Lambda functions not working with functions as parameters~~
-- [x] ~~if condition isn't working for empty list~~
-- [x] ~~Quote Not behaving as a list~~
-- [ ] Handling unnessary parentisis
-- [x] ~~Handling Unequal Parentisis~~
-- [ ] ~~Handling Wrong Operator~~
-- [ ] Handling less than required params
-- [ ] Handling More than required params
-- [ ] Multiple expressions in single line
-- [ ] Cleaning the code
-- [ ]
+- [x] ~~If condition Not working~~
+- [x] ~~Quote not working~~
+- [x] ~~Create A whiteSpace parser~~
 
 ### Review Feedback
 
@@ -25,5 +17,5 @@
 - ~~env should be the first param~~
 - ~~Handling improper operator defnition~~
 - Issues with error handling
-- return same types
-- Writing Pure Functions
+- ~~return same types~~
+- ~~Writing Pure Functions~~
