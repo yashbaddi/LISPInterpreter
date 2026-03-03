@@ -41,7 +41,7 @@ A lightweight and efficient LISP interpreter implemented in Node.js, supporting 
 To start the interactive REPL:
 
 ```bash
-node lisp.js
+npm run repl
 ```
 
 Once in the REPL, you can type LISP expressions and see the results immediately:
@@ -52,6 +52,14 @@ LISP > (+ 5 10)
 LISP > (define square (lambda (x) (* x x)))
 LISP > (square 4)
 16
+```
+
+### Running the Tests
+
+This project uses [Vitest](https://vitest.dev/) for testing. To run the suite:
+
+```bash
+npm test
 ```
 
 ---
@@ -106,7 +114,7 @@ LISP > (square 4)
 - `valueParser.js`: Handles parsing of individual values (numbers, strings, booleans).
 - `specialForms.js`: Implements core LISP constructs like `define`, `if`, and `lambda`.
 - `symbols.js`: Defines the global environment and built-in primitive functions.
-- `test.js`: Contains a suite of test cases showcasing various functionalities.
+- `tests/`: Directory containing the Vitest test suite.
 
 ---
 
