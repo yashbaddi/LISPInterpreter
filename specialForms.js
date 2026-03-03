@@ -67,6 +67,3 @@ let specialForms = {
 };
 
 export default specialForms;
-
-specialForms["define"](env, " x 2)");
-specialForms["if"](env, " #t (if #f 3 2) 7)");
