@@ -15,14 +15,16 @@ export default function lispint(input) {
   return val[0];
 }
 
-// console.log(lispint("(define 2x 2)"));
-console.log(lispint("(define x 2"));
-
-rl.setPrompt("LISP > ");
-rl.prompt();
-rl.on("line", (input) => {
-  console.log(lispint(input));
+if (
+  process.env.REPL === "true" ||
+  import.meta.url === `file://${process.argv[1]}` //Check if the file is run directly
+) {
+  rl.setPrompt("LISP > ");
   rl.prompt();
-});
+  rl.on("line", (input) => {
+    console.log(lispint(input));
+    rl.prompt();
+  });
 
-rl.on("SIGINT", () => rl.pause());
+  rl.on("SIGINT", () => rl.pause());
+}
