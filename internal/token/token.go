@@ -73,7 +73,7 @@ func (l *Lexer) NextToken() (Token, error) {
 }
 
 func (l *Lexer) skipWhiteSpace() {
-	for unicode.IsSpace(rune(l.input[l.pos])) {
+	for l.pos < len(l.input) && unicode.IsSpace(rune(l.input[l.pos])) {
 		l.pos += 1
 	}
 }
