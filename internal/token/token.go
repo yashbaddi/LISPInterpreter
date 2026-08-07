@@ -61,7 +61,7 @@ func (l *Lexer) NextToken() (Token, error) {
 		str, err := l.readString()
 		return Token{Type: STRING, Literal: str}, err
 	case unicode.IsDigit(ch):
-		num, err := l.readNumber()
+		num, err := l.readInteger()
 		return Token{Type: NUMBER, Literal: num}, err
 	case unicode.IsLetter(ch):
 		idet, err := l.readIdentifier()
@@ -78,7 +78,7 @@ func (l *Lexer) skipWhiteSpace() {
 	}
 }
 
-func (l *Lexer) readNumber() (string, error) {
+func (l *Lexer) readInteger() (string, error) {
 	var builder strings.Builder
 
 	if l.pos >= len(l.input) {
