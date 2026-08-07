@@ -79,45 +79,34 @@ func (l *Lexer) skipWhiteSpace() {
 }
 
 func (l *Lexer) readNumber() (string, error) {
-	start := l.pos
-	if l.input[l.pos] == '+' || l.input[l.pos] == '-' {
-		l.pos++
-	}
+	var builder strings.Builder
 
-	seenDot := false
-
-	for l.pos < len(l.input) {
-		ch := l.input[l.pos]
-		switch {
-		case ch == '.':
-			if seenDot {
-				return l.input[start:l.pos], nil
-			}
-			seenDot = true
-			l.pos++
-		case ch == 'e' || ch == 'E':
-			l.pos++
-			if l.pos < len(l.input) && (l.input[l.pos] == '+' || l.input[l.pos] == '-') {
-				l.pos++
-			}
-			if l.pos < len(l.input) && unicode.IsDigit(rune(l.input[l.pos])) {
-				for l.pos < len(l.input) && unicode.IsDigit(rune(l.input[l.pos])) {
-					l.pos++
-				}
-				continue
-			}
-			// Invalid exponent suffix; backtrack to before the exponent marker.
-			l.pos -= 1
-			return l.input[start:l.pos], nil
-		case unicode.IsDigit(rune(ch)):
-			l.pos++
-
-		default:
-			return l.input[start:l.pos], nil
+	if l.pos >= len(l.input) {
+		return "", LexerError{
+			Pos: l.pos,
+			Msg: "unexpected end of input",
 		}
 	}
 
-	return l.input[start:l.pos], nil
+	for l.pos < len(l.input) {
+		r := rune(l.input[l.pos])
+
+		if !unicode.IsDigit(r) {
+			break
+		}
+
+		builder.WriteRune(r)
+		l.pos++
+	}
+
+	if builder.Len() == 0 {
+		return "", LexerError{
+			Pos: l.pos,
+			Msg: "expected a number",
+		}
+	}
+
+	return builder.String(), nil
 }
 
 func (l *Lexer) readString() (string, error) {
