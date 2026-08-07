@@ -156,7 +156,7 @@ func (l *Lexer) readString() (string, error) {
 
 func (l *Lexer) readIdentifier() (string, error) {
 	start := l.pos
-	for unicode.IsLetter(rune(l.input[l.pos])) {
+	for l.pos < len(l.input) && unicode.IsLetter(rune(l.input[l.pos])) {
 		l.pos++
 	}
 	return l.input[start:l.pos], nil
