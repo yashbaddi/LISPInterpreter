@@ -2,7 +2,6 @@ package token
 
 import (
 	"fmt"
-	"slices"
 	"strconv"
 	"strings"
 	"unicode"
@@ -28,7 +27,7 @@ type Token struct {
 }
 
 type Lexer struct {
-	input string
+	input []rune
 	pos   int
 }
 
@@ -41,6 +40,12 @@ func (e LexerError) Error() string {
 	return fmt.Sprintf("Lexical Error: %d: %s", e.Pos, e.Msg)
 }
 
+func NewLexer(input string) *Lexer {
+	return &Lexer{
+		input: []rune(input),
+	}
+}
+
 func (l *Lexer) NextToken() (Token, error) {
 
 	l.skipWhiteSpace()
@@ -48,7 +53,7 @@ func (l *Lexer) NextToken() (Token, error) {
 		return Token{Type: EOF, Literal: ""}, nil
 	}
 
-	ch := rune(l.input[l.pos])
+	ch := l.input[l.pos]
 	switch {
 	case ch == '(':
 		l.pos++
@@ -59,37 +64,39 @@ func (l *Lexer) NextToken() (Token, error) {
 	case ch == '"':
 		l.pos++
 		str, err := l.readString()
-		return Token{Type: STRING, Literal: str}, err
+		if err != nil {
+			return Token{}, err
+		}
+		return Token{Type: STRING, Literal: str}, nil
 	case unicode.IsDigit(ch):
 		num, err := l.readInteger()
-		return Token{Type: NUMBER, Literal: num}, err
+		if err != nil {
+			return Token{}, err
+		}
+		return Token{Type: NUMBER, Literal: num}, nil
 	case unicode.IsLetter(ch):
 		idet, err := l.readIdentifier()
-		return Token{Type: IDENTIFIER, Literal: idet}, err
+		if err != nil {
+			return Token{}, err
+		}
+		return Token{Type: IDENTIFIER, Literal: idet}, nil
 	default:
-		return Token{Type: ILLEGAL, Literal: string(ch)}, LexerError{Pos: l.pos, Msg: "Invalid Token Encountered"}
+		return Token{}, LexerError{Pos: l.pos, Msg: "Invalid Token Encountered"}
 	}
 
 }
 
 func (l *Lexer) skipWhiteSpace() {
-	for l.pos < len(l.input) && unicode.IsSpace(rune(l.input[l.pos])) {
+	for l.pos < len(l.input) && unicode.IsSpace(l.input[l.pos]) {
 		l.pos += 1
 	}
 }
 
 func (l *Lexer) readInteger() (string, error) {
 	var builder strings.Builder
-
-	if l.pos >= len(l.input) {
-		return "", LexerError{
-			Pos: l.pos,
-			Msg: "unexpected end of input",
-		}
-	}
-
+	start := l.pos
 	for l.pos < len(l.input) {
-		r := rune(l.input[l.pos])
+		r := l.input[l.pos]
 
 		if !unicode.IsDigit(r) {
 			break
@@ -101,7 +108,7 @@ func (l *Lexer) readInteger() (string, error) {
 
 	if builder.Len() == 0 {
 		return "", LexerError{
-			Pos: l.pos,
+			Pos: start,
 			Msg: "expected a number",
 		}
 	}
@@ -111,6 +118,7 @@ func (l *Lexer) readInteger() (string, error) {
 
 func (l *Lexer) readString() (string, error) {
 	var builder strings.Builder
+	start := l.pos
 
 	for l.pos < len(l.input) {
 		switch l.input[l.pos] {
@@ -120,25 +128,27 @@ func (l *Lexer) readString() (string, error) {
 		case '\\':
 			l.pos++
 			if l.pos == len(l.input) {
-				return "", LexerError{Pos: l.pos, Msg: "Unexpected End of file"}
+				return "", LexerError{Pos: start, Msg: "Unexpected End of file"}
 			}
-			selectedRunes := []rune{'"', '\\', '/', 'b', 'f', 'n', 'r', 't'}
-			r := rune(l.input[l.pos])
-			if slices.Contains(selectedRunes, r) {
+
+			r := l.input[l.pos]
+
+			switch r {
+			case '"', '\\', '/', 'b', 'f', 'n', 'r', 't':
 				l.pos++
 				builder.WriteRune(r)
 				continue
-			}
-			if r == 'u' {
+
+			case 'u':
 				if len(l.input)-l.pos < 5 {
-					return "", LexerError{Pos: l.pos, Msg: "Invalid Hex Value"}
+					return "", LexerError{Pos: start, Msg: "Invalid Hex Value"}
 				}
 
-				hex := l.input[l.pos+1 : l.pos+5]
+				hex := string(l.input[l.pos+1 : l.pos+5])
 
 				value, err := strconv.ParseUint(hex, 16, 16)
 				if err != nil {
-					return "", LexerError{Pos: l.pos, Msg: "Invalid Hex Value"}
+					return "", LexerError{Pos: start, Msg: "Invalid Hex Value"}
 				}
 
 				l.pos += 5
@@ -146,18 +156,18 @@ func (l *Lexer) readString() (string, error) {
 				continue
 			}
 		default:
-			builder.WriteByte(l.input[l.pos])
+			builder.WriteRune(l.input[l.pos])
 			l.pos++
 		}
 	}
-	return "", LexerError{Pos: l.pos, Msg: "Unexpected End of file"}
+	return "", LexerError{Pos: start, Msg: "Unexpected End of file"}
 
 }
 
 func (l *Lexer) readIdentifier() (string, error) {
 	start := l.pos
-	for l.pos < len(l.input) && unicode.IsLetter(rune(l.input[l.pos])) {
+	for l.pos < len(l.input) && unicode.IsLetter(l.input[l.pos]) {
 		l.pos++
 	}
-	return l.input[start:l.pos], nil
+	return string(l.input[start:l.pos]), nil
 }
