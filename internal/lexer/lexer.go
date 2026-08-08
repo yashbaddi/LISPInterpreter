@@ -124,7 +124,8 @@ func (l *Lexer) readString() (string, error) {
 					return "", LexerError{Pos: start, Msg: "Invalid Hex Value"}
 				}
 
-				l.pos += 5
+				l.advanceN(5)
+
 				builder.WriteRune(rune(value))
 				continue
 			}
@@ -151,6 +152,13 @@ func (l *Lexer) current() rune {
 
 func (l *Lexer) advance() {
 	l.pos++
+}
+
+func (l *Lexer) advanceN(n int) {
+	l.pos += n
+	if l.pos > len(l.input) {
+		l.pos = len(l.input)
+	}
 }
 
 func (l *Lexer) eof() bool {
