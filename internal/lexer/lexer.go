@@ -105,29 +105,45 @@ func (l *Lexer) readString() (string, error) {
 			}
 
 			r := l.current()
+			l.advance()
 
 			switch r {
-			case '"', '\\', '/', 'b', 'f', 'n', 'r', 't':
-				l.advance()
-				builder.WriteRune(r)
-				continue
-
+			case '"':
+				builder.WriteRune('"')
+			case '\\':
+				builder.WriteRune('\\')
+			case '/':
+				builder.WriteRune('/')
+			case 'b':
+				builder.WriteRune('\b')
+			case 'f':
+				builder.WriteRune('\f')
+			case 'n':
+				builder.WriteRune('\n')
+			case 'r':
+				builder.WriteRune('\r')
+			case 't':
+				builder.WriteRune('\t')
 			case 'u':
-				if len(l.input)-l.pos < 5 {
+				if len(l.input)-l.pos < 4 {
 					return "", LexerError{Pos: start, Msg: "Invalid Hex Value"}
 				}
 
-				hex := string(l.input[l.pos+1 : l.pos+5])
+				hex := string(l.input[l.pos : l.pos+4])
 
 				value, err := strconv.ParseUint(hex, 16, 16)
 				if err != nil {
 					return "", LexerError{Pos: start, Msg: "Invalid Hex Value"}
 				}
 
-				l.advanceN(5)
+				l.advanceN(4)
 
 				builder.WriteRune(rune(value))
-				continue
+			default:
+				return "", LexerError{
+					Pos: start,
+					Msg: "invalid escape sequence",
+				}
 			}
 		default:
 			builder.WriteRune(l.current())
