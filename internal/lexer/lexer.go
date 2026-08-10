@@ -34,6 +34,9 @@ func (l *Lexer) NextToken() (token.Token, error) {
 	case ch == ')':
 		l.advance()
 		return token.Token{Type: token.RPAREN, Literal: ")"}, nil
+	case ch == '+':
+		l.advance()
+		return token.Token{Type: token.IDENTIFIER, Literal: "+"}, nil
 	case ch == '"':
 		l.advance()
 		str, err := l.readString()
@@ -164,6 +167,21 @@ func (l *Lexer) readIdentifier() (string, error) {
 
 func (l *Lexer) current() rune {
 	return l.input[l.pos]
+}
+
+func (l *Lexer) peek() (token.Token, error) {
+	start := l.pos
+
+	tok, err := l.NextToken()
+	l.pos = start
+
+	if err != nil {
+		return token.Token{}, LexerError{
+			Pos: l.pos,
+			Msg: "Peek Failed",
+		}
+	}
+	return tok, nil
 }
 
 func (l *Lexer) advance() {
