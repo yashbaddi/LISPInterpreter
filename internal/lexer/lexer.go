@@ -70,7 +70,7 @@ func (l *Lexer) current() rune {
 	return l.input[l.pos]
 }
 
-func (l *Lexer) peek() (token.Token, error) {
+func (l *Lexer) Peek() (token.Token, error) {
 	start := l.pos
 
 	tok, err := l.NextToken()
