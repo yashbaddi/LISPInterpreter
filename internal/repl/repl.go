@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"github.com/yashbaddi/golisp/internal/lexer"
-	"github.com/yashbaddi/golisp/internal/token"
+	"github.com/yashbaddi/golisp/internal/parser"
 )
 
 func Start(in io.Reader, out io.Writer) {
@@ -24,18 +24,15 @@ func Start(in io.Reader, out io.Writer) {
 		input := scanner.Text()
 
 		lex := lexer.NewLexer(input)
+		p := parser.NewParser(lex)
 
-		for {
-			tok, err := lex.NextToken()
-			if err != nil {
-				fmt.Println(out, err)
-				break
-			}
-			if tok.Type == token.EOF {
-				break
-			}
-
-			fmt.Fprintf(out, "%v %q\n", tok.Type, tok.Literal)
+		ast, err := p.Parse()
+		if err != nil {
+			fmt.Fprintln(out, err)
+			break
 		}
+
+		fmt.Fprintf(out, "%q\n", ast)
+
 	}
 }
