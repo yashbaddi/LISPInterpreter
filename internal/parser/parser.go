@@ -60,6 +60,12 @@ func (p *Parser) Parse() (*ast.Program, error) {
 		return &ast.Program{
 			Expression: pident,
 		}, nil
+	case token.RPAREN:
+		return &ast.Program{}, ParserError{
+			tokenLiteral: p.currToken.Literal,
+			Msg:          "Unexpected Close Parenthesis",
+		}
+
 	default:
 		return &ast.Program{}, ParserError{
 			tokenLiteral: p.currToken.Literal,
@@ -111,6 +117,12 @@ func (p *Parser) parseList() (*ast.List, error) {
 
 	var l []ast.Expression
 	for p.peekToken.Type != token.RPAREN {
+		if p.peekToken.Type == token.EOF {
+			return &ast.List{}, ParserError{
+				tokenLiteral: p.currToken.Literal,
+				Msg:          "Unexpected End of Token",
+			}
+		}
 		expr, err := p.Parse()
 		if err != nil {
 			return &ast.List{}, ParserError{
