@@ -1,5 +1,10 @@
 package ast
 
+import (
+	"strconv"
+	"strings"
+)
+
 type Node interface {
 	String() string
 }
@@ -11,6 +16,13 @@ type Expression interface {
 
 type Program struct {
 	Expression Expression
+}
+
+func (p Program) String() string {
+	if p.Expression != nil {
+		return p.Expression.String()
+	}
+	return ""
 }
 
 type List struct {
@@ -29,14 +41,26 @@ func (NumberLiteral) expressionNode() {}
 func (Identifier) expressionNode()    {}
 func (List) expressionNode()          {}
 
-func (NumberLiteral) String() string {
-	return ""
+func (n NumberLiteral) String() string {
+	return strconv.Itoa(n.Value)
 }
-func (Identifier) String() string {
-	return ""
 
+func (i Identifier) String() string {
+	return i.Value
 }
-func (List) String() string {
-	return ""
 
+func (l List) String() string {
+	var out strings.Builder
+	out.WriteString("(")
+
+	elems := make([]string, len(l.Elements))
+	for idx, el := range l.Elements {
+		if el != nil {
+			elems[idx] = el.String()
+		}
+	}
+	out.WriteString(strings.Join(elems, " "))
+
+	out.WriteString(")")
+	return out.String()
 }
