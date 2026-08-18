@@ -3,8 +3,8 @@ package parser
 import (
 	"strconv"
 
-	"github.com/yashbaddi/golisp/internal/ast"
 	"github.com/yashbaddi/golisp/internal/lexer"
+	"github.com/yashbaddi/golisp/internal/node"
 	"github.com/yashbaddi/golisp/internal/token"
 )
 
@@ -21,58 +21,38 @@ func NewParser(l *lexer.Lexer) *Parser {
 	}
 }
 
-func (p *Parser) Parse() (*ast.Program, error) {
-
+func (p *Parser) Parse() (any, error) {
 	err := p.newToken()
-
 	if err != nil {
-		return &ast.Program{}, ParserError{
+		return nil, ParserError{
 			tokenLiteral: p.currToken.Literal,
 			Msg:          "Bad Token",
 		}
 	}
+	return p.parseExpression()
+}
 
+func (p *Parser) parseExpression() (any, error) {
 	switch p.currToken.Type {
 	case token.LPAREN:
-		plist, err := p.parseList()
-		if err != nil {
-			return &ast.Program{}, err
-		}
-
-		return &ast.Program{
-			Expression: plist,
-		}, nil
+		return p.parseList()
 	case token.NUMBER:
-		pnum, err := p.parseNumber()
-		if err != nil {
-			return &ast.Program{}, err
-		}
-
-		return &ast.Program{
-			Expression: pnum,
-		}, nil
+		return p.parseNumber()
 	case token.IDENTIFIER:
-		pident, err := p.parseIdentifer()
-		if err != nil {
-			return &ast.Program{}, err
-		}
-
-		return &ast.Program{
-			Expression: pident,
-		}, nil
+		return p.parseSymbol()
+	case token.STRING:
+		return p.currToken.Literal, nil
 	case token.RPAREN:
-		return &ast.Program{}, ParserError{
+		return nil, ParserError{
 			tokenLiteral: p.currToken.Literal,
 			Msg:          "Unexpected Close Parenthesis",
 		}
-
 	default:
-		return &ast.Program{}, ParserError{
+		return nil, ParserError{
 			tokenLiteral: p.currToken.Literal,
 			Msg:          "Invalid Token",
 		}
 	}
-
 }
 
 func (p *Parser) newToken() error {
@@ -94,45 +74,43 @@ func (p *Parser) newToken() error {
 	return nil
 }
 
-func (p *Parser) parseIdentifer() (ast.Identifier, error) {
-	return ast.Identifier{
-		Value: p.currToken.Literal,
-	}, nil
+func (p *Parser) parseSymbol() (node.Symbol, error) {
+	return node.Symbol(p.currToken.Literal), nil
 }
 
-func (p *Parser) parseNumber() (ast.NumberLiteral, error) {
+func (p *Parser) parseNumber() (int, error) {
 	val, err := strconv.Atoi(p.currToken.Literal)
 	if err != nil {
-		return ast.NumberLiteral{}, ParserError{
+		return 0, ParserError{
 			tokenLiteral: p.currToken.Literal,
 			Msg:          "Invalid Number",
 		}
 	}
-	return ast.NumberLiteral{
-		Value: val,
-	}, nil
+	return val, nil
 }
 
-func (p *Parser) parseList() (*ast.List, error) {
-
-	var l []ast.Expression
+func (p *Parser) parseList() (node.List, error) {
+	var l node.List
 	for p.peekToken.Type != token.RPAREN {
 		if p.peekToken.Type == token.EOF {
-			return &ast.List{}, ParserError{
+			return nil, ParserError{
 				tokenLiteral: p.currToken.Literal,
 				Msg:          "Unexpected End of Token",
 			}
 		}
-		expr, err := p.Parse()
+		err := p.newToken()
 		if err != nil {
-			return &ast.List{}, ParserError{
-				tokenLiteral: p.currToken.Literal,
-				Msg:          "Parse Fail",
-			}
+			return nil, err
 		}
-		l = append(l, expr.Expression)
+		expr, err := p.parseExpression()
+		if err != nil {
+			return nil, err
+		}
+		l = append(l, expr)
 	}
-	return &ast.List{
-		Elements: l,
-	}, nil
+	err := p.newToken()
+	if err != nil {
+		return nil, err
+	}
+	return l, nil
 }

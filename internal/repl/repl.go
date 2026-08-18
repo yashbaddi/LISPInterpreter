@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/yashbaddi/golisp/internal/evaluate"
 	"github.com/yashbaddi/golisp/internal/lexer"
 	"github.com/yashbaddi/golisp/internal/parser"
 )
@@ -14,6 +15,8 @@ func Start(in io.Reader, out io.Writer) {
 	if err := scanner.Err(); err != nil {
 		fmt.Fprintln(out, err)
 	}
+
+	env := evaluate.NewGlobalEnv()
 
 	for {
 		fmt.Fprint(out, "lisp > ")
@@ -26,13 +29,18 @@ func Start(in io.Reader, out io.Writer) {
 		lex := lexer.NewLexer(input)
 		p := parser.NewParser(lex)
 
-		ast, err := p.Parse()
+		parsed, err := p.Parse()
 		if err != nil {
 			fmt.Fprintln(out, err)
-			break
+			continue
 		}
 
-		fmt.Fprintf(out, "%q\n", ast)
+		result, err := evaluate.Eval(parsed, env)
+		if err != nil {
+			fmt.Fprintln(out, err)
+			continue
+		}
 
+		fmt.Fprintf(out, "%v\n", result)
 	}
 }
