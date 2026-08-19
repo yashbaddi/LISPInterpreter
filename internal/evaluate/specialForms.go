@@ -8,7 +8,7 @@ import (
 
 func isSpecialForm(sym node.Symbol) bool {
 	switch sym {
-	case "define", "if":
+	case "define", "if", "lambda":
 		return true
 	default:
 		return false
@@ -21,6 +21,8 @@ func evalSpecialForm(sym node.Symbol, args node.List, env *Env) (any, error) {
 		return evalDefine(args, env)
 	case "if":
 		return evalIf(args, env)
+	case "lambda":
+		return evalLambda(args, env)
 	default:
 		return nil, fmt.Errorf("unknown special form: %s", sym)
 	}
@@ -74,4 +76,47 @@ func evalIf(args node.List, env *Env) (any, error) {
 	}
 
 	return nil, nil
+}
+
+func evalLambda(args node.List, env *Env) (any, error) {
+	if len(args) < 2 {
+		return nil, fmt.Errorf("lambda requires at least 2 arguments (params and body), got %d", len(args))
+	}
+
+	paramsList, ok := args[0].(node.List)
+	if !ok {
+		return nil, fmt.Errorf("lambda parameters must be a list, got %T", args[0])
+	}
+
+	params := make([]node.Symbol, len(paramsList))
+	for i, p := range paramsList {
+		sym, ok := p.(node.Symbol)
+		if !ok {
+			return nil, fmt.Errorf("lambda parameter must be a symbol, got %T", p)
+		}
+		params[i] = sym
+	}
+
+	bodyExprs := args[1:]
+
+	return func(callArgs []any) (any, error) {
+		if len(callArgs) != len(params) {
+			return nil, fmt.Errorf("lambda expected %d arguments, got %d", len(params), len(callArgs))
+		}
+
+		localEnv := NewEnv(env)
+		for i, param := range params {
+			localEnv.Set(param, callArgs[i])
+		}
+
+		var res any
+		var err error
+		for _, expr := range bodyExprs {
+			res, err = Eval(expr, localEnv)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return res, nil
+	}, nil
 }
