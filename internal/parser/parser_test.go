@@ -14,8 +14,11 @@ func TestParse(t *testing.T) {
 		expected any
 	}{
 		{"123", 123},
+		{"3.14", 3.14},
+		{"-42.5", -42.5},
 		{"foo", node.Symbol("foo")},
 		{"( + 1 2)", node.List{node.Symbol("+"), 1, 2}},
+		{"( * 2.5 4)", node.List{node.Symbol("*"), 2.5, 4}},
 	}
 
 	for _, tt := range tests {

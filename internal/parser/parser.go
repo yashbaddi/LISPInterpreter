@@ -2,6 +2,7 @@ package parser
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/yashbaddi/golisp/internal/lexer"
 	"github.com/yashbaddi/golisp/internal/node"
@@ -78,10 +79,21 @@ func (p *Parser) parseSymbol() (node.Symbol, error) {
 	return node.Symbol(p.currToken.Literal), nil
 }
 
-func (p *Parser) parseNumber() (int, error) {
+func (p *Parser) parseNumber() (any, error) {
+	if strings.Contains(p.currToken.Literal, ".") {
+		val, err := strconv.ParseFloat(p.currToken.Literal, 64)
+		if err != nil {
+			return nil, ParserError{
+				tokenLiteral: p.currToken.Literal,
+				Msg:          "Invalid Float Number",
+			}
+		}
+		return val, nil
+	}
+
 	val, err := strconv.Atoi(p.currToken.Literal)
 	if err != nil {
-		return 0, ParserError{
+		return nil, ParserError{
 			tokenLiteral: p.currToken.Literal,
 			Msg:          "Invalid Number",
 		}

@@ -6,28 +6,80 @@ import (
 	"unicode"
 )
 
-func (l *Lexer) readInteger() (string, error) {
+func (l *Lexer) isStartingOfNumber() bool {
+	if l.eof() {
+		return false
+	}
+	ch := l.current()
+	if unicode.IsDigit(ch) {
+		return true
+	}
+
+	rest := l.input[l.pos:]
+	if (ch == '+' || ch == '-') && len(rest) > 1 {
+		if unicode.IsDigit(rest[1]) {
+			return true
+		}
+		if rest[1] == '.' && len(rest) > 2 && unicode.IsDigit(rest[2]) {
+			return true
+		}
+	}
+	if ch == '.' && len(rest) > 1 && unicode.IsDigit(rest[1]) {
+		return true
+	}
+	return false
+}
+
+func isSymbolOperator(r rune) bool {
+	return strings.ContainsRune("+-*/%><=?_", r)
+}
+
+func (l *Lexer) readSymbolOperator() string {
+	start := l.pos
+	for !l.eof() && isSymbolOperator(l.current()) {
+		l.advance()
+	}
+	return string(l.input[start:l.pos])
+}
+
+func (l *Lexer) readNumber() (string, error) {
 	var builder strings.Builder
 	start := l.pos
-	for !l.eof() {
-		r := l.current()
+	hasDecimal := false
 
-		if !unicode.IsDigit(r) {
-			break
-		}
-
-		builder.WriteRune(r)
+	if !l.eof() && (l.current() == '-' || l.current() == '+') {
+		builder.WriteRune(l.current())
 		l.advance()
 	}
 
-	if builder.Len() == 0 {
+	for !l.eof() {
+		r := l.current()
+
+		if unicode.IsDigit(r) {
+			builder.WriteRune(r)
+			l.advance()
+		} else if r == '.' && !hasDecimal {
+			hasDecimal = true
+			builder.WriteRune(r)
+			l.advance()
+		} else {
+			break
+		}
+	}
+
+	result := builder.String()
+	if builder.Len() == 0 || result == "-" || result == "+" || result == "." || result == "-." || result == "+." {
 		return "", LexerError{
 			Pos: start,
 			Msg: "expected a number",
 		}
 	}
 
-	return builder.String(), nil
+	return result, nil
+}
+
+func (l *Lexer) readInteger() (string, error) {
+	return l.readNumber()
 }
 
 func (l *Lexer) readString() (string, error) {
@@ -97,7 +149,7 @@ func (l *Lexer) readString() (string, error) {
 
 func (l *Lexer) readIdentifier() (string, error) {
 	start := l.pos
-	for !l.eof() && unicode.IsLetter(l.current()) {
+	for !l.eof() && (unicode.IsLetter(l.current()) || l.current() == '?' || l.current() == '!') {
 		l.advance()
 	}
 	return string(l.input[start:l.pos]), nil

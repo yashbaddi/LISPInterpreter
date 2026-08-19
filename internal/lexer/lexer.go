@@ -32,9 +32,6 @@ func (l *Lexer) NextToken() (token.Token, error) {
 	case ch == ')':
 		l.advance()
 		return token.Token{Type: token.RPAREN, Literal: ")"}, nil
-	case ch == '+':
-		l.advance()
-		return token.Token{Type: token.IDENTIFIER, Literal: "+"}, nil
 	case ch == '"':
 		l.advance()
 		str, err := l.readString()
@@ -42,12 +39,15 @@ func (l *Lexer) NextToken() (token.Token, error) {
 			return token.Token{}, err
 		}
 		return token.Token{Type: token.STRING, Literal: str}, nil
-	case unicode.IsDigit(ch):
-		num, err := l.readInteger()
+	case l.isStartingOfNumber():
+		num, err := l.readNumber()
 		if err != nil {
 			return token.Token{}, err
 		}
 		return token.Token{Type: token.NUMBER, Literal: num}, nil
+	case isSymbolOperator(ch):
+		op := l.readSymbolOperator()
+		return token.Token{Type: token.IDENTIFIER, Literal: op}, nil
 	case unicode.IsLetter(ch):
 		idet, err := l.readIdentifier()
 		if err != nil {
