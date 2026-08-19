@@ -86,6 +86,10 @@ func Eval(x any, env *Env) (any, error) {
 		if len(val) == 0 {
 			return nil, nil
 		}
+		if sym, ok := val[0].(node.Symbol); ok && isSpecialForm(sym) {
+			return evalSpecialForm(sym, val[1:], env)
+		}
+
 		op, err := Eval(val[0], env)
 		if err != nil {
 			return nil, err
