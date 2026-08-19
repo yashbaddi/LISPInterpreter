@@ -11,9 +11,10 @@ func TestTokenTypes(t *testing.T) {
 		{RPAREN, 1},
 		{STRING, 2},
 		{NUMBER, 3},
-		{IDENTIFIER, 4},
-		{ILLEGAL, 5},
-		{EOF, 6},
+		{BOOLEAN, 4},
+		{IDENTIFIER, 5},
+		{ILLEGAL, 6},
+		{EOF, 7},
 	}
 
 	for _, tt := range tokens {
@@ -53,6 +54,12 @@ func TestTokenCreation(t *testing.T) {
 			token:    Token{Type: NUMBER, Literal: "123"},
 			wantType: NUMBER,
 			wantLit:  "123",
+		},
+		{
+			name:     "BOOLEAN token",
+			token:    Token{Type: BOOLEAN, Literal: "#t"},
+			wantType: BOOLEAN,
+			wantLit:  "#t",
 		},
 		{
 			name:     "IDENTIFIER token",

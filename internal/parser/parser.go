@@ -39,6 +39,8 @@ func (p *Parser) parseExpression() (any, error) {
 		return p.parseList()
 	case token.NUMBER:
 		return p.parseNumber()
+	case token.BOOLEAN:
+		return p.parseBoolean()
 	case token.IDENTIFIER:
 		return p.parseSymbol()
 	case token.STRING:
@@ -77,6 +79,13 @@ func (p *Parser) newToken() error {
 
 func (p *Parser) parseSymbol() (node.Symbol, error) {
 	return node.Symbol(p.currToken.Literal), nil
+}
+
+func (p *Parser) parseBoolean() (bool, error) {
+	if p.currToken.Literal == "#t" {
+		return true, nil
+	}
+	return false, nil
 }
 
 func (p *Parser) parseNumber() (any, error) {

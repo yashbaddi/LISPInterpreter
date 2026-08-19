@@ -32,6 +32,18 @@ func (l *Lexer) NextToken() (token.Token, error) {
 	case ch == ')':
 		l.advance()
 		return token.Token{Type: token.RPAREN, Literal: ")"}, nil
+	case ch == '#':
+		startPos := l.pos
+		l.advance()
+		if !l.eof() && (l.current() == 't' || l.current() == 'f') {
+			boolChar := l.current()
+			l.advance()
+			if boolChar == 't' {
+				return token.Token{Type: token.BOOLEAN, Literal: "#t"}, nil
+			}
+			return token.Token{Type: token.BOOLEAN, Literal: "#f"}, nil
+		}
+		return token.Token{}, LexerError{Pos: startPos, Msg: "Invalid Token Encountered"}
 	case ch == '"':
 		l.advance()
 		str, err := l.readString()

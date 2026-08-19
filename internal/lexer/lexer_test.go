@@ -64,6 +64,16 @@ func TestNextToken(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:  "boolean literals",
+			input: "#t #f",
+			expected: []token.Token{
+				{Type: token.BOOLEAN, Literal: "#t"},
+				{Type: token.BOOLEAN, Literal: "#f"},
+				{Type: token.EOF, Literal: ""},
+			},
+			wantErr: false,
+		},
+		{
 			name:  "identifier",
 			input: "foo",
 			expected: []token.Token{
@@ -289,8 +299,8 @@ func TestReadString(t *testing.T) {
 }
 
 func TestReadIdentifier(t *testing.T) {
-	t.Run("valid identifier", func(t *testing.T) {
-		l := NewLexer("foo123")
+	t.Run("valid identifier with space", func(t *testing.T) {
+		l := NewLexer("foo 123")
 		id, err := l.readIdentifier()
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
@@ -300,6 +310,20 @@ func TestReadIdentifier(t *testing.T) {
 		}
 		if l.pos != 3 {
 			t.Errorf("expected pos 3, got %d", l.pos)
+		}
+	})
+
+	t.Run("valid alphanumeric identifier", func(t *testing.T) {
+		l := NewLexer("foo123")
+		id, err := l.readIdentifier()
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if id != "foo123" {
+			t.Errorf("expected %q, got %q", "foo123", id)
+		}
+		if l.pos != 6 {
+			t.Errorf("expected pos 6, got %d", l.pos)
 		}
 	})
 
