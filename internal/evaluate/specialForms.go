@@ -54,6 +54,9 @@ func isTruthy(val any) bool {
 	if b, ok := val.(bool); ok {
 		return b
 	}
+	if l, ok := val.(node.List); ok && len(l) == 0 {
+		return false
+	}
 	return true
 }
 
