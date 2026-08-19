@@ -148,8 +148,11 @@ func (l *Lexer) readString() (string, error) {
 }
 
 func (l *Lexer) readIdentifier() (string, error) {
+	if l.eof() || (!unicode.IsLetter(l.current()) && l.current() != '?' && l.current() != '!') {
+		return "", nil
+	}
 	start := l.pos
-	for !l.eof() && (unicode.IsLetter(l.current()) || l.current() == '?' || l.current() == '!') {
+	for !l.eof() && (unicode.IsLetter(l.current()) || unicode.IsDigit(l.current()) || l.current() == '-' || l.current() == '_' || l.current() == '?' || l.current() == '!') {
 		l.advance()
 	}
 	return string(l.input[start:l.pos]), nil
