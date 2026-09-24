@@ -1,0 +1,349 @@
+package evaluate
+
+import (
+	"testing"
+
+	"github.com/yashbaddi/golisp/internal/node"
+)
+
+func TestDefineSpecialForm(t *testing.T) {
+	t.Run("Define integer variable", func(t *testing.T) {
+		env := NewGlobalEnv()
+		expr := node.List{node.Symbol("define"), node.Symbol("x"), 42}
+		res, err := Eval(expr, env)
+		if err != nil {
+			t.Fatalf("unexpected error defining x: %v", err)
+		}
+		if res != 42 {
+			t.Errorf("expected define to return 42, got %v", res)
+		}
+
+		// Evaluate symbol x
+		resX, err := Eval(node.Symbol("x"), env)
+		if err != nil {
+			t.Fatalf("unexpected error evaluating x: %v", err)
+		}
+		if resX != 42 {
+			t.Errorf("expected x to be 42, got %v", resX)
+		}
+	})
+
+	t.Run("Define with expression", func(t *testing.T) {
+		env := NewGlobalEnv()
+		expr := node.List{
+			node.Symbol("define"),
+			node.Symbol("y"),
+			node.List{node.Symbol("+"), 10, 20},
+		}
+		res, err := Eval(expr, env)
+		if err != nil {
+			t.Fatalf("unexpected error defining y: %v", err)
+		}
+		if res != 30 {
+			t.Errorf("expected define to return 30, got %v", res)
+		}
+
+		// Use defined variable in arithmetic
+		useExpr := node.List{node.Symbol("+"), node.Symbol("y"), 5}
+		resUse, err := Eval(useExpr, env)
+		if err != nil {
+			t.Fatalf("unexpected error evaluating (+ y 5): %v", err)
+		}
+		if resUse != 35 {
+			t.Errorf("expected 35, got %v", resUse)
+		}
+	})
+
+	t.Run("Define error cases", func(t *testing.T) {
+		env := NewGlobalEnv()
+
+		// Non-symbol target
+		_, err := Eval(node.List{node.Symbol("define"), 123, 456}, env)
+		if err == nil {
+			t.Errorf("expected error when defining non-symbol target, got nil")
+		}
+
+		// Incorrect argument count (1 arg)
+		_, err = Eval(node.List{node.Symbol("define"), node.Symbol("a")}, env)
+		if err == nil {
+			t.Errorf("expected error for missing define value, got nil")
+		}
+
+		// Incorrect argument count (3 args)
+		_, err = Eval(node.List{node.Symbol("define"), node.Symbol("a"), 1, 2}, env)
+		if err == nil {
+			t.Errorf("expected error for too many define args, got nil")
+		}
+	})
+}
+
+func TestIfSpecialForm(t *testing.T) {
+	env := NewGlobalEnv()
+
+	t.Run("Truthy condition evaluates then-branch", func(t *testing.T) {
+		expr := node.List{
+			node.Symbol("if"),
+			node.List{node.Symbol(">"), 5, 2},
+			100,
+			200,
+		}
+		res, err := Eval(expr, env)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if res != 100 {
+			t.Errorf("expected 100, got %v", res)
+		}
+	})
+
+	t.Run("Falsy condition evaluates else-branch", func(t *testing.T) {
+		expr := node.List{
+			node.Symbol("if"),
+			node.List{node.Symbol("<"), 5, 2},
+			100,
+			200,
+		}
+		res, err := Eval(expr, env)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if res != 200 {
+			t.Errorf("expected 200, got %v", res)
+		}
+	})
+
+	t.Run("Falsy condition without else-branch returns nil", func(t *testing.T) {
+		expr := node.List{
+			node.Symbol("if"),
+			node.List{node.Symbol("="), 1, 2},
+			100,
+		}
+		res, err := Eval(expr, env)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if res != nil {
+			t.Errorf("expected nil, got %v", res)
+		}
+	})
+
+	t.Run("Short circuiting - unchosen branch is not evaluated", func(t *testing.T) {
+		// (if true 10 (/ 1 0)) - division by zero branch should NOT be evaluated
+		expr := node.List{
+			node.Symbol("if"),
+			true,
+			10,
+			node.List{node.Symbol("/"), 1, 0},
+		}
+		res, err := Eval(expr, env)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if res != 10 {
+			t.Errorf("expected 10, got %v", res)
+		}
+	})
+
+	t.Run("If error cases", func(t *testing.T) {
+		// Too few arguments (1 arg)
+		_, err := Eval(node.List{node.Symbol("if"), true}, env)
+		if err == nil {
+			t.Errorf("expected error for if with 1 arg, got nil")
+		}
+
+		// Too many arguments (4 args)
+		_, err = Eval(node.List{node.Symbol("if"), true, 1, 2, 3}, env)
+		if err == nil {
+			t.Errorf("expected error for if with 4 args, got nil")
+		}
+	})
+}
+
+func TestLambdaSpecialForm(t *testing.T) {
+	t.Run("Basic lambda definition and call", func(t *testing.T) {
+		env := NewGlobalEnv()
+		// (define twice (lambda (x) (* 2 x)))
+		defExpr := node.List{
+			node.Symbol("define"),
+			node.Symbol("twice"),
+			node.List{
+				node.Symbol("lambda"),
+				node.List{node.Symbol("x")},
+				node.List{node.Symbol("*"), 2, node.Symbol("x")},
+			},
+		}
+		_, err := Eval(defExpr, env)
+		if err != nil {
+			t.Fatalf("unexpected error defining lambda: %v", err)
+		}
+
+		// (twice 5)
+		callExpr := node.List{node.Symbol("twice"), 5}
+		res, err := Eval(callExpr, env)
+		if err != nil {
+			t.Fatalf("unexpected error calling twice: %v", err)
+		}
+		if res != 10 {
+			t.Errorf("expected 10, got %v", res)
+		}
+	})
+
+	t.Run("Immediately invoked lambda expression", func(t *testing.T) {
+		env := NewGlobalEnv()
+		// ((lambda (x) (* x x)) 6)
+		expr := node.List{
+			node.List{
+				node.Symbol("lambda"),
+				node.List{node.Symbol("x")},
+				node.List{node.Symbol("*"), node.Symbol("x"), node.Symbol("x")},
+			},
+			6,
+		}
+		res, err := Eval(expr, env)
+		if err != nil {
+			t.Fatalf("unexpected error calling IIFE: %v", err)
+		}
+		if res != 36 {
+			t.Errorf("expected 36, got %v", res)
+		}
+	})
+
+	t.Run("Multi-expression body", func(t *testing.T) {
+		env := NewGlobalEnv()
+		// ((lambda (x) (define y 5) (+ x y)) 10)
+		expr := node.List{
+			node.List{
+				node.Symbol("lambda"),
+				node.List{node.Symbol("x")},
+				node.List{node.Symbol("define"), node.Symbol("y"), 5},
+				node.List{node.Symbol("+"), node.Symbol("x"), node.Symbol("y")},
+			},
+			10,
+		}
+		res, err := Eval(expr, env)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if res != 15 {
+			t.Errorf("expected 15, got %v", res)
+		}
+	})
+
+	t.Run("Higher-order function and lexical closure", func(t *testing.T) {
+		env := NewGlobalEnv()
+		// (define make-adder (lambda (x) (lambda (y) (+ x y))))
+		defMakeAdder := node.List{
+			node.Symbol("define"),
+			node.Symbol("make-adder"),
+			node.List{
+				node.Symbol("lambda"),
+				node.List{node.Symbol("x")},
+				node.List{
+					node.Symbol("lambda"),
+					node.List{node.Symbol("y")},
+					node.List{node.Symbol("+"), node.Symbol("x"), node.Symbol("y")},
+				},
+			},
+		}
+		_, err := Eval(defMakeAdder, env)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		// (define add5 (make-adder 5))
+		defAdd5 := node.List{
+			node.Symbol("define"),
+			node.Symbol("add5"),
+			node.List{node.Symbol("make-adder"), 5},
+		}
+		_, err = Eval(defAdd5, env)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		// (add5 10) -> 15
+		res, err := Eval(node.List{node.Symbol("add5"), 10}, env)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if res != 15 {
+			t.Errorf("expected 15, got %v", res)
+		}
+	})
+
+	t.Run("Recursive factorial function", func(t *testing.T) {
+		env := NewGlobalEnv()
+		// (define fact (lambda (n) (if (<= n 1) 1 (* n (fact (- n 1))))))
+		defFact := node.List{
+			node.Symbol("define"),
+			node.Symbol("fact"),
+			node.List{
+				node.Symbol("lambda"),
+				node.List{node.Symbol("n")},
+				node.List{
+					node.Symbol("if"),
+					node.List{node.Symbol("<="), node.Symbol("n"), 1},
+					1,
+					node.List{
+						node.Symbol("*"),
+						node.Symbol("n"),
+						node.List{
+							node.Symbol("fact"),
+							node.List{node.Symbol("-"), node.Symbol("n"), 1},
+						},
+					},
+				},
+			},
+		}
+		_, err := Eval(defFact, env)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		res, err := Eval(node.List{node.Symbol("fact"), 5}, env)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if res != 120 {
+			t.Errorf("expected 120, got %v", res)
+		}
+	})
+
+	t.Run("Lambda error cases", func(t *testing.T) {
+		env := NewGlobalEnv()
+
+		// Too few arguments to lambda (missing body)
+		_, err := Eval(node.List{node.Symbol("lambda"), node.List{node.Symbol("x")}}, env)
+		if err == nil {
+			t.Errorf("expected error for lambda with missing body, got nil")
+		}
+
+		// Non-list parameter target
+		_, err = Eval(node.List{node.Symbol("lambda"), node.Symbol("x"), 10}, env)
+		if err == nil {
+			t.Errorf("expected error for non-list params, got nil")
+		}
+
+		// Non-symbol item in parameter list
+		_, err = Eval(node.List{node.Symbol("lambda"), node.List{node.Symbol("x"), 123}, 10}, env)
+		if err == nil {
+			t.Errorf("expected error for non-symbol param, got nil")
+		}
+
+		// Wrong argument count on invocation
+		fn, err := Eval(node.List{
+			node.Symbol("lambda"),
+			node.List{node.Symbol("x")},
+			node.Symbol("x"),
+		}, env)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		fnVal := fn.(func([]any) (any, error))
+		_, err = fnVal([]any{1, 2})
+		if err == nil {
+			t.Errorf("expected error when passing 2 args to 1-param lambda, got nil")
+		}
+	})
+}
